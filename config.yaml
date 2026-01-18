@@ -1,0 +1,8 @@
+tokenizer:
+  repo: "Qwen/Qwen3-4B"
+  file: "tokenizer.json"
+
+llm:
+  repo: "unsloth/Qwen3-4B-GGUF"
+  file: "Qwen3-4B-Q4_K_M.gguf"
+  branch: "main"
