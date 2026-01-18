@@ -9,3 +9,7 @@ logits:
 .PHONY: haiku
 haiku:
 	cargo run --bin haiku --features metal,accelerate
+
+.PHONY: llm-inference
+llm-inference:
+	cargo run --bin llm-inference --features metal,accelerate
