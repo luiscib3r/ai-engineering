@@ -1,0 +1,16 @@
+tokenizer:
+  repo: "Qwen/Qwen3-4B"
+  file: "tokenizer.json"
+  eos_token: "<|im_end|>"
+  chat_template: "<|im_start|>user\n{{ message }}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+
+llm:
+  repo: "unsloth/Qwen3-4B-GGUF"
+  file: "Qwen3-4B-Q4_K_M.gguf"
+  branch: "main"
+
+inference:
+  max_length: 1024
+  temperature: 0.7
+  top_p: 0.9
+  top_k: 50

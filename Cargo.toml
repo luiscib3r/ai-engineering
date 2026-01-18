@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["haiku","logits","tokens"]
+members = ["haiku", "llm-inference","logits","tokens"]
 
 [workspace.dependencies]
 candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.9.2-alpha.2" }
