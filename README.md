@@ -18,8 +18,9 @@ Serie de artículos técnicos que explora la implementación de sistemas con Lar
 
 Serie de artículos técnicos que explican en profundidad los conceptos implementados en este repositorio:
 
-1. [**Qué Pasa Cuando un LLM "Piensa": Tokens, Logits, y Sampling**](https://www.luisciber.com/p/que-pasa-cuando-un-llm-piensa-tokens)  
-   Explicación completa del proceso interno de inferencia en LLMs: desde la tokenización del texto hasta la generación de respuestas, pasando por logits, probabilidades y estrategias de sampling.
+1. [**Qué Pasa Cuando un LLM "Piensa": Tokens, Logits, y Sampling**](https://www.luisciber.com/p/que-pasa-cuando-un-llm-piensa-tokens)
+
+2. [**Cómo un Modelo “Genera” Texto: Forward Pass, KV Cache, y el Loop de Generación**](https://www.luisciber.com/p/como-un-modelo-genera-texto-forward)
 
 ## 📚 Contenido de la Serie
 
