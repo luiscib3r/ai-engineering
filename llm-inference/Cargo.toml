@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.9.2-alpha.2" }
-candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.9.2-alpha.2" }
+candle-core = { version = "0.9.2" }
+candle-transformers = { version = "0.9.2" }
 color-eyre = "0.6.5"
 config = { version = "0.15.19", features = ["yaml"] }
 hf-hub =  { version = "0.4.3", features = ["rustls-tls", "tokio"] }
@@ -26,9 +26,9 @@ accelerate = ["candle-core/accelerate", "candle-transformers/accelerate"]
 
 # Auto-select features based on target OS
 [target.'cfg(target_os = "macos")'.dependencies]
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.9.2-alpha.2", features = ["metal", "accelerate"] }
-candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.9.2-alpha.2", features = ["metal", "accelerate"] }
+candle-core = { version = "0.9.2", features = ["metal", "accelerate"] }
+candle-transformers = { version = "0.9.2", features = ["metal", "accelerate"] }
 
 [target.'cfg(any(target_os = "linux", target_os = "windows"))'.dependencies]
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.9.2-alpha.2", features = ["mkl"] }
-candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.9.2-alpha.2", features = ["mkl"] }
+candle-core = { version = "0.9.2", features = ["mkl"] }
+candle-transformers = { version = "0.9.2", features = ["mkl"] }
