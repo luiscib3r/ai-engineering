@@ -23,6 +23,7 @@ pub struct Llm {
     start_completion: String,
     max_length: usize,
     kv_cache_offset: usize,
+    banned_tokens: Vec<u32>,
 }
 
 impl Llm {
@@ -66,12 +67,25 @@ impl Llm {
             .as_str(),
         );
 
+        let banned_tokens: Vec<u32> = config
+            .tokenizer
+            .banned_tokens
+            .iter()
+            .filter_map(|token| {
+                let id = vocab.get(token.as_str()).copied();
+                if id.is_none() {
+                    tracing::warn!("⚠️  Token baneado '{}' no existe en vocabulario", token);
+                }
+                id
+            })
+            .collect();
+
         let mut model_file = std::fs::File::open(&model_path)?;
         let model_content = gguf_file::Content::read(&mut model_file)?;
         let model = Qwen3::from_gguf(model_content, &mut model_file, &device)?;
 
         let logits_processor = LogitsProcessor::from_sampling(
-            42, // seed (para reproducibilidad)
+            config.llm.seed,
             Sampling::TopKThenTopP {
                 temperature: config.inference.temperature,
                 k: config.inference.top_k,
@@ -82,6 +96,7 @@ impl Llm {
         let mut prompt = Tera::default();
         prompt.add_raw_template("user", &config.tokenizer.user_template)?;
         prompt.add_raw_template("assistant", &config.tokenizer.assistant_template)?;
+        prompt.add_raw_template("system", &config.tokenizer.system_template)?;
 
         Ok(Self {
             device,
@@ -93,6 +108,7 @@ impl Llm {
             start_completion: config.tokenizer.start_completion.clone(),
             max_length: config.inference.max_length.clone(),
             kv_cache_offset: 0,
+            banned_tokens,
         })
     }
 
@@ -134,6 +150,7 @@ impl Llm {
             let input = Tensor::new(&[next_token], &self.device)?.unsqueeze(0)?;
             let logits = self.model.forward(&input, self.kv_cache_offset)?;
             let logits = logits.squeeze(0)?;
+            let logits = self.apply_logits_bias(&logits)?;
             next_token = self.logits_processor.sample(&logits)?;
             generated_tokens.push(next_token);
             self.kv_cache_offset += 1;
@@ -165,6 +182,7 @@ impl Llm {
         let input = Tensor::new(&tokens[..], &self.device)?.unsqueeze(0)?;
         let logits = self.model.forward(&input, self.kv_cache_offset)?;
         let logits = logits.squeeze(0)?;
+        let logits = self.apply_logits_bias(&logits)?;
 
         // Recalculate the KV cache size
         let next_token = self.logits_processor.sample(&logits)?;
@@ -172,10 +190,21 @@ impl Llm {
         Ok(next_token)
     }
 
+    fn apply_logits_bias(&self, logits: &Tensor) -> Result<Tensor> {
+        let mut logits_vec = logits.to_vec1::<f32>()?;
+
+        for &token_id in &self.banned_tokens {
+            logits_vec[token_id as usize] = f32::NEG_INFINITY;
+        }
+
+        Ok(Tensor::from_vec(logits_vec, logits.shape(), &self.device)?)
+    }
+
     fn render(&self, messages: &Vec<Message>) -> Result<String> {
         let text_messages: Vec<String> = messages
             .iter()
             .map(|message| match message {
+                Message::System { content } => self.render_system(content),
                 Message::User { content } => self.render_user(content),
                 Message::Assistant { content } => self.render_assistant(content),
             })
@@ -184,6 +213,13 @@ impl Llm {
         let mut rendered = text_messages.join("");
         rendered.push_str(&self.start_completion);
         Ok(rendered)
+    }
+
+    fn render_system(&self, message: &str) -> Result<String> {
+        let mut context = Context::new();
+        context.insert("message", message);
+        let msg = self.prompt.render("system", &context)?;
+        Ok(msg)
     }
 
     fn render_assistant(&self, message: &str) -> Result<String> {

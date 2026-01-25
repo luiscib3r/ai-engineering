@@ -21,9 +21,11 @@ pub struct TokenizerConfig {
     pub repo: String,
     pub file: String,
     pub eos_token: String,
+    pub system_template: String,
     pub user_template: String,
     pub assistant_template: String,
     pub start_completion: String,
+    pub banned_tokens: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -31,6 +33,7 @@ pub struct LlmConfig {
     pub repo: String,
     pub file: String,
     pub branch: String,
+    pub seed: u64,
 }
 
 #[derive(Debug, Deserialize)]

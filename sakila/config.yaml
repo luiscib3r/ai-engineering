@@ -6,14 +6,17 @@ tokenizer:
   repo: "Qwen/Qwen3-4B"
   file: "tokenizer.json"
   eos_token: "<|im_end|>"
-  user_template: "<|im_start|>user\n{{ message }}<|im_end|>"
-  assistant_template: "<|im_start|>assistant\n{{ message }}<|im_end|>"
-  start_completion: "<|im_start|>assistant\n<think>\n</think>"
+  system_template: "<|im_start|>system\n{{ message }}<|im_end|>\n"
+  user_template: "<|im_start|>user\n{{ message }}\n<|im_end|>\n"
+  assistant_template: "<|im_start|>assistant\n{{ message }}<|im_end|>\n"
+  start_completion: "<|im_start|>assistant\n<think>\nNo Think\n</think>\n\n"
+  banned_tokens: [<think>, </think>]
 
 llm:
   repo: "unsloth/Qwen3-4B-GGUF"
   file: "Qwen3-4B-Q4_K_M.gguf"
   branch: "main"
+  seed: 42 # Seed for logits sampling
 
 inference:
   max_length: 1024
