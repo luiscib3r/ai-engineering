@@ -1,11 +1,8 @@
-use std::io::{self, Write};
-
+use crate::{agent::Agent, config::AppConfig};
 use color_eyre::Result;
-use colored::Colorize;
 use tracing_subscriber::EnvFilter;
 
-use crate::{config::AppConfig, llm::stream::PrintCallback};
-
+mod agent;
 mod chat;
 mod config;
 mod db;
@@ -28,42 +25,17 @@ async fn main() -> Result<()> {
     let config = AppConfig::load()?;
 
     // Load database
-    let _ = db::load(&config.db).await?;
+    let db = db::load(&config.db).await?;
 
     // Load llm
-    let mut llm = llm::Llm::load(&config).await?;
+    let llm = llm::Llm::load(&config).await?;
+
+    // Build agent
+    let mut agent = Agent::new(&config.agent, llm, db);
 
     println!("Sakila Chat (type /exit to quit)\n");
 
-    // Chat
-    loop {
-        println!("\n─ {} ─", "You".bright_cyan().bold());
-        io::stdout().flush()?;
-
-        let mut input = String::new();
-        io::stdin().read_line(&mut input)?;
-        let input = input.trim();
-
-        if input.is_empty() {
-            continue;
-        }
-
-        if input == "/exit" {
-            break;
-        }
-
-        let user_message = chat::Message::User {
-            content: input.to_string(),
-        };
-
-        println!("\n─ {} ─", "Assistant".bright_cyan().bold());
-        io::stdout().flush()?;
-
-        let mut callback = PrintCallback::new(llm.get_tokenizer());
-        llm.chat_stream(&vec![user_message], &mut callback)?;
-
-        println!();
-    }
+    agent.run().await?;
 
     Ok(())
 }

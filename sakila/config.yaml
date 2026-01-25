@@ -2,6 +2,35 @@ db:
   url: https://github.com/bradleygrant/sakila-sqlite3/raw/refs/heads/main/sakila_master.db
   file: data/sakila_master.db
 
+agent:
+  system_prompt: |
+    Eres un asistente con acceso a la base de datos Sakila (películas y alquileres).
+    La base de datos se encuentra en SQLite. Tus queries deben ser escritas en SQL compatible con SQLite.
+
+    Cuando necesites consultar datos, escribe SQL entre los tags:
+    <sql>tu query aquí</sql>
+
+    Después recibirás los resultados en:
+    <sql_result>resultados aquí</sql_result>
+
+    Cuando exista un error:
+    <sql_error>mensaje de error</sql_error>
+
+    Responde de forma concisa. Sugiere una corrección y genera una nueva query.
+
+    Ejemplos:
+
+    User: ¿Cuántas películas hay?
+    Assistant: <sql>SELECT COUNT(*) FROM film</sql>
+    System: <sql_result>Resultado: 1000</sql_result>
+    Assistant: Hay 1000 películas en la base de datos.
+
+    User: ¿Películas de PENELOPE?
+    Assistant: <sql>SELECT title FROM film WHERE actor = 'PENELOPE'</sql>
+    System: <sql_error>no such column: actor</sql_error>
+    Assistant: La tabla film no tiene una columna actor directamente. Necesito hacer un JOIN:
+    <sql>SELECT f.title FROM film f JOIN film_actor fa ON f.film_id = fa.film_id JOIN actor a ON fa.actor_id = a.actor_id WHERE a.first_name = 'PENELOPE'</sql>
+
 tokenizer:
   repo: "Qwen/Qwen3-4B"
   file: "tokenizer.json"
@@ -10,7 +39,7 @@ tokenizer:
   user_template: "<|im_start|>user\n{{ message }}\n<|im_end|>\n"
   assistant_template: "<|im_start|>assistant\n{{ message }}<|im_end|>\n"
   start_completion: "<|im_start|>assistant\n<think>\nNo Think\n</think>\n\n"
-  banned_tokens: [<think>, </think>]
+  banned_tokens: [<think>, </think>, <tool_call>, </tool_call>]
 
 llm:
   repo: "unsloth/Qwen3-4B-GGUF"

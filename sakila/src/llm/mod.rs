@@ -173,7 +173,14 @@ impl Llm {
             .decode(&generated_tokens, true)
             .map_err(Error::msg)?;
 
+        self.clean_cache();
+
         Ok(result)
+    }
+
+    fn clean_cache(&mut self) {
+        self.kv_cache_offset = 0;
+        self.model.clear_kv_cache();
     }
 
     fn prefill(&mut self, text: &str) -> Result<u32> {

@@ -5,6 +5,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct AppConfig {
     pub db: DbConfig,
+    pub agent: AgentConfig,
     pub tokenizer: TokenizerConfig,
     pub llm: LlmConfig,
     pub inference: InferenceConfig,
@@ -14,6 +15,11 @@ pub struct AppConfig {
 pub struct DbConfig {
     pub url: String,
     pub file: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct AgentConfig {
+    pub system_prompt: String,
 }
 
 #[derive(Debug, Deserialize)]
