@@ -13,3 +13,7 @@ haiku:
 .PHONY: llm-inference
 llm-inference:
 	cargo run --bin llm-inference --features metal,accelerate
+
+.PHONY: sakila
+sakila:
+	cargo run --bin sakila --features metal,accelerate

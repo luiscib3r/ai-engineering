@@ -1,0 +1,22 @@
+db:
+  url: https://github.com/bradleygrant/sakila-sqlite3/raw/refs/heads/main/sakila_master.db
+  file: data/sakila_master.db
+
+tokenizer:
+  repo: "Qwen/Qwen3-4B"
+  file: "tokenizer.json"
+  eos_token: "<|im_end|>"
+  user_template: "<|im_start|>user\n{{ message }}<|im_end|>"
+  assistant_template: "<|im_start|>assistant\n{{ message }}<|im_end|>"
+  start_completion: "<|im_start|>assistant\n<think>\n</think>"
+
+llm:
+  repo: "unsloth/Qwen3-4B-GGUF"
+  file: "Qwen3-4B-Q4_K_M.gguf"
+  branch: "main"
+
+inference:
+  max_length: 1024
+  temperature: 0.7
+  top_p: 0.9
+  top_k: 50

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["haiku", "llm-inference","logits","tokens"]
+members = ["haiku", "llm-inference","logits", "sakila","tokens"]
 
 [workspace.dependencies]
 candle-core = { version = "0.9.2" }
