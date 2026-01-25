@@ -32,19 +32,40 @@ pub(super) async fn run_query(pool: &Pool<Sqlite>, query: &str) -> Result<Value>
         let mut obj = serde_json::Map::new();
 
         for (i, column) in row.columns().iter().enumerate() {
-            let value = if let Ok(v) = row.try_get::<i64, _>(i) {
-                json!(v)
-            } else if let Ok(v) = row.try_get::<f64, _>(i) {
-                json!(v)
-            } else if let Ok(v) = row.try_get::<String, _>(i) {
-                json!(v)
-            } else if let Ok(v) = row.try_get::<bool, _>(i) {
-                json!(v)
-            } else {
-                json!(null)
-            };
+            let column_name = column.name();
 
-            obj.insert(column.name().to_string(), value);
+            // Intentar tipos en orden (de más específico a más genérico)
+            let value =
+                // Intentar i32 primero (SMALLINT en SQLite)
+                if let Ok(Some(v)) = row.try_get::<Option<i32>, _>(i) {
+                    json!(v)
+                }
+                // Intentar i64 (INTEGER, BIGINT)
+                else if let Ok(Some(v)) = row.try_get::<Option<i64>, _>(i) {
+                    json!(v)
+                }
+                // Intentar u32 (por si acaso)
+                else if let Ok(Some(v)) = row.try_get::<Option<u32>, _>(i) {
+                    json!(v)
+                }
+                // Intentar f64 (REAL, FLOAT, DOUBLE)
+                else if let Ok(Some(v)) = row.try_get::<Option<f64>, _>(i) {
+                    json!(v)
+                }
+                // Intentar String (TEXT, VARCHAR, CHAR, TIMESTAMP)
+                else if let Ok(Some(v)) = row.try_get::<Option<String>, _>(i) {
+                    json!(v)
+                }
+                // Intentar bool
+                else if let Ok(Some(v)) = row.try_get::<Option<bool>, _>(i) {
+                    json!(v)
+                }
+                // Si todo falla o es NULL explícito
+                else {
+                    json!(null)
+                };
+
+            obj.insert(column_name.to_string(), value);
         }
 
         results.push(Value::Object(obj));
@@ -84,7 +105,16 @@ pub(super) fn format_results(result: &Value) -> String {
         if let Some(obj) = row.as_object() {
             let values: Vec<String> = obj
                 .iter()
-                .map(|(k, v)| format!("{}: {}", k, v.as_str().unwrap_or("NULL")))
+                .map(|(k, v)| {
+                    let value_str = match v {
+                        Value::Null => "NULL".to_string(),
+                        Value::Number(n) => n.to_string(),
+                        Value::String(s) => s.clone(),
+                        Value::Bool(b) => b.to_string(),
+                        _ => v.to_string(),
+                    };
+                    format!("{}: {}", k, value_str)
+                })
                 .collect();
             output.push_str(&values.join(", "));
         }

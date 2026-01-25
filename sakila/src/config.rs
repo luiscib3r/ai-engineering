@@ -20,6 +20,7 @@ pub struct DbConfig {
 #[derive(Debug, Deserialize, Clone)]
 pub struct AgentConfig {
     pub system_prompt: String,
+    pub max_iterations: usize,
 }
 
 #[derive(Debug, Deserialize)]

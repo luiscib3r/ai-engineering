@@ -14,6 +14,8 @@ pub struct Agent {
     llm: Llm,
     db: Pool<Sqlite>,
     memory: Vec<Message>,
+    max_iterations: usize,
+    last_sql: Option<String>,
 }
 
 mod sql;
@@ -27,6 +29,8 @@ impl Agent {
             llm,
             db,
             memory: vec![system_message],
+            max_iterations: cfg.max_iterations,
+            last_sql: None,
         }
     }
 
@@ -59,7 +63,26 @@ impl Agent {
             };
             self.memory.push(user_message);
 
-            while self.run_agent().await? {}
+            let mut iterations = 0;
+            while iterations < self.max_iterations && self.run_agent().await? {
+                iterations += 1;
+            }
+
+            if iterations >= self.max_iterations {
+                println!(
+                    "{}",
+                    "\n⚠️  Límite de iteraciones alcanzado".bright_yellow()
+                );
+            }
+
+            // Clean system tools messages
+            self.memory.retain(|msg| match msg {
+                Message::System { content } => {
+                    !content.starts_with("<sql_result>") && !content.starts_with("<sql_error>")
+                }
+                _ => true,
+            });
+            self.last_sql = None;
 
             println!();
         }
@@ -85,6 +108,31 @@ impl Agent {
             println!("\n");
             println!("{}", "🔍 Ejecutando SQL...".bright_yellow());
             println!("{}", format!("   {}", sql.dimmed()));
+
+            if self.last_sql.as_ref() == Some(&sql) {
+                println!(
+                    "{}",
+                    "\n⚠️  El modelo está generando la misma query. Deteniendo ejecución de sql."
+                        .bright_yellow()
+                );
+                // Agregar mensaje de ayuda al contexto
+                let hint_message = Message::System {
+                    content: format!(
+                        "<sql_result>
+                        Ya ejecutaste esta query: {}\n\
+                        El resultado no fue el esperado. Intenta:\n\
+                        1. Una query DIFERENTE\n\
+                        2. Simplificar la query\n\
+                        3. Explicar al usuario que hay un problema con los datos
+                        </sql_result>",
+                        sql
+                    ),
+                };
+                self.memory.push(hint_message);
+                return Ok(true);
+            }
+
+            self.last_sql = Some(sql.clone());
 
             // Execute SQL
             self.run_sql(&sql).await;
