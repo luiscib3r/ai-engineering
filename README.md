@@ -1,85 +1,75 @@
-# AI Engineering con LLMs en Rust
+# AI Engineering with LLMs in Rust
 
-> Serie educativa sobre implementación de sistemas LLM desde los fundamentos hasta producción
+Educational series on implementing LLM systems from fundamentals to production.
 
 [![Rust](https://img.shields.io/badge/rust-2024-orange.svg)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-work%20in%20progress-yellow.svg)]()
 
-## 🎯 Sobre este Proyecto
+## About
 
-Serie de artículos técnicos que explora la implementación de sistemas con Large Language Models desde una perspectiva pragmática. El objetivo es entender y controlar cada capa del stack: desde tokenización hasta serving, pasando por inferencia, logits, sampling y RAG.
+A hands-on exploration of Large Language Models implementation. Each module builds understanding from the ground up: tokenization, inference, logits, sampling, and generation loops.
 
-**Enfoque**: Sin abstracciones mágicas. Construimos desde los fundamentos, entendiendo cómo funcionan realmente los LLMs.
+## Structure
 
-**Por qué Rust**: Control de bajo nivel, rendimiento, safety y concurrencia.
-
-## 📝 Artículos
-
-Serie de artículos técnicos que explican en profundidad los conceptos implementados en este repositorio:
-
-1. [**Qué Pasa Cuando un LLM "Piensa": Tokens, Logits, y Sampling**](https://www.luisciber.com/p/que-pasa-cuando-un-llm-piensa-tokens)
-
-2. [**Cómo un Modelo “Genera” Texto: Forward Pass, KV Cache, y el Loop de Generación**](https://www.luisciber.com/p/como-un-modelo-genera-texto-forward)
-
-## 📚 Contenido de la Serie
-
-### 1. **Tokens** - Los Fundamentos
-Entendiendo cómo el texto se convierte en números que un modelo puede procesar.
-
-**Conceptos**: Tokenización con HuggingFace, vocabulario, encoding/decoding, caracteres especiales.
-
-```bash
-make tokens
+```
+ai-engineering-rust/
+├── tokens/          # Basic tokenization
+├── logits/          # Logits analysis and sampling
+├── haiku/           # Text generation
+├── llm-inference/   # Complete inference pipeline
+├── config.yaml      # Model configuration
+└── Cargo.toml       # Workspace
 ```
 
-### 2. **Logits** - Entendiendo la Salida del Modelo
-Análisis de logits, probabilidades y estrategias de sampling.
-
-**Conceptos**: Forward pass, logits a probabilidades (softmax), estrategias de sampling (greedy, temperature), modelos cuantizados (GGUF), aceleración por hardware.
+## Quick Start
 
 ```bash
-make logits
-```
-
-### 3. **Haiku** - Generación de Texto Completa
-Implementación end-to-end de un generador de texto con diferentes configuraciones.
-
-**Conceptos**: Generación autoregresiva, control de temperatura, tokens especiales (EOS), streaming, comparación de estrategias.
-
-```bash
-make haiku
-```
-
-### 4. **LLM Inference** - Pipeline Completo de Inferencia
-Implementación profesional del pipeline completo: prefill, KV cache, y loop autoregresivo.
-
-**Conceptos**: Prefill optimizado, KV cache, generación autoregresiva eficiente, chat templates, configuración avanzada de sampling (top-k, top-p), estadísticas de generación.
-
-```bash
-make llm-inference
-```
-
-## 🚀 Quick Start
-
-```bash
-# Clonar el repositorio
 git clone https://github.com/luisciber/ai-engineering-rust.git
 cd ai-engineering-rust
 
-# Compilar todos los proyectos
+# Build
 cargo build --release
 
-# Ejecutar ejemplos
+# Run examples
 make tokens
 make logits
 make haiku
 make llm-inference
 ```
 
-### Configuración
+## Modules
 
-El archivo `config.yaml` define los modelos y parámetros de inferencia:
+### 1. Tokens
+Text-to-numbers conversion and tokenization basics.
+
+```bash
+make tokens
+```
+
+### 2. Logits
+Model output analysis, probabilities, and sampling strategies.
+
+```bash
+make logits
+```
+
+### 3. Haiku
+End-to-end text generation with configurable parameters.
+
+```bash
+make haiku
+```
+
+### 4. LLM Inference
+Complete pipeline: prefill, KV cache, autoregressive loop.
+
+```bash
+make llm-inference
+```
+
+## Configuration
+
+Edit `config.yaml` to customize models and inference parameters:
 
 ```yaml
 tokenizer:
@@ -97,82 +87,38 @@ inference:
   max_length: 256
 ```
 
-## 🏗️ Arquitectura
+## Stack
 
-Workspace de Cargo con múltiples crates independientes:
+- **[Candle](https://github.com/huggingface/candle)**: ML framework in Rust
+- **[Tokenizers](https://github.com/huggingface/tokenizers)**: Fast tokenization
+- **[hf-hub](https://github.com/huggingface/hf-hub)**: HuggingFace Hub client
+- **[GGUF](https://github.com/ggerganov/ggml)**: Quantized model format
 
-```
-ai-engineering-rust/
-├── tokens/          # Tokenización básica
-├── logits/          # Análisis de logits y sampling
-├── haiku/           # Generación de texto
-├── llm-inference/   # Pipeline completo de inferencia
-├── config.yaml      # Configuración de modelos
-└── Cargo.toml       # Workspace configuration
-```
+Supports Metal (Apple Silicon), CUDA, Accelerate, MKL, and CPU.
 
-### Stack Tecnológico
+## Key Concepts
 
-- **[Candle](https://github.com/huggingface/candle)**: Framework de ML en Rust (HuggingFace)
-- **[Tokenizers](https://github.com/huggingface/tokenizers)**: Tokenización rápida
-- **[hf-hub](https://github.com/huggingface/hf-hub)**: Cliente para HuggingFace Hub
-- **[GGUF](https://github.com/ggerganov/ggml)**: Formato de modelos cuantizados
+- **Tokenization**: BPE, vocabulary, encoding/decoding
+- **Inference**: Forward pass, quantized models, memory optimization
+- **Logits**: Raw logits, probabilities, softmax
+- **Sampling**: Greedy, temperature, top-k, top-p
+- **Generation**: Autoregressive loop, KV cache, prefill, streaming
 
-### Aceleración por Hardware
+## Contributing
 
-Soporta múltiples backends: Metal (Apple Silicon), CUDA (NVIDIA), Accelerate, MKL, CPU.
+Pull requests welcome. Keep it simple, practical, and well-documented.
 
-## 🎓 Conceptos Clave
+1. Fork the repo
+2. Create a branch
+3. Make your changes
+4. Submit a PR
 
-- **Tokenización**: BPE, vocabulario, encoding/decoding
-- **Inferencia**: Forward pass, modelos cuantizados, optimización de memoria
-- **Logits**: Raw logits vs probabilidades, softmax, top-k analysis
-- **Sampling**: Greedy, temperature-based, top-k, top-p
-- **Generación**: Loop autoregresivo, KV cache, prefill, streaming, EOS tokens
+## License
 
-## 🛣️ Roadmap
+MIT
 
-- [x] Tokenización básica
-- [x] Inferencia y análisis de logits
-- [x] Generación de texto con sampling
-- [x] Pipeline completo de inferencia
-- [ ] Implementación de RAG
-- [ ] Embeddings y búsqueda semántica
-- [ ] Serving con API REST
-- [ ] Fine-tuning con LoRA
+## Acknowledgments
 
-## 🤝 Contribuciones
-
-Los Pull Requests son bienvenidos para expandir la serie con nuevos conceptos o mejorar implementaciones.
-
-### Cómo contribuir
-
-1. Fork el repositorio
-2. Crea una rama (`git checkout -b feature/amazing-feature`)
-3. Commit tus cambios (`git commit -m 'Add amazing feature'`)
-4. Push a la rama (`git push origin feature/amazing-feature`)
-5. Abre un Pull Request
-
-### Guías
-
-- Mantén el enfoque pragmático y educativo
-- Documenta decisiones técnicas y el "por qué"
-- Incluye ejemplos ejecutables
-- Evita abstracciones innecesarias
-
-## 🙏 Agradecimientos
-
-- [HuggingFace](https://huggingface.co/) por Candle y los modelos
-- [Qwen Team](https://github.com/QwenLM) por Qwen3
-- [unsloth](https://huggingface.co/unsloth) por las versiones GGUF optimizadas
-
-## 📚 Recursos
-
-- [Candle Examples](https://github.com/huggingface/candle/tree/main/candle-examples)
-- [Tokenizers Docs](https://huggingface.co/docs/tokenizers/index)
-- [GGUF Specification](https://github.com/ggerganov/ggml/blob/master/docs/gguf.md)
-- [Attention is All You Need](https://arxiv.org/abs/1706.03762)
-
----
-
-**Construido con 🦀 Rust y ❤️ por [Luis Correa](https://www.luisciber.com)**
+- [HuggingFace](https://huggingface.co/) for Candle and models
+- [Qwen Team](https://github.com/QwenLM) for Qwen3
+- [unsloth](https://huggingface.co/unsloth) for optimized GGUF versions
